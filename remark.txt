@@ -1,0 +1,5 @@
+使用方法：
+使用之前需要先安装note.js和npm，之后用npm导入包copy-webpack-plugin、imagemin-mozjpeg、imagemin-webpack-plugin、path、webpack、webpack-cli
+配置webpack环境变量，在用户变量和系统变量path中添加D:\nodejs\node_global\node_modules，在系统变量中新加NODE_PATH为D:\nodejs\node_global\node_modules
+打开
+webpack --config webpack.config.js --mode production

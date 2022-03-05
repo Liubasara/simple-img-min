@@ -1,0 +1,71 @@
+使用npm批量无损压缩网站图片
+
+【摘要】
+本文介绍了Node.js和npm的安装配置以及用法，还介绍了npm常用的基本操作命令；介绍了webpack等常用命令的配置方法；重点讲解批量压缩图片的操作方法，并为了方便使用，还提供了批处理项目压缩包来批量压缩图片。
+
+【npm和使用包的概念】
+Node.js 是一个基于 Chrome V8 引擎的 JavaScript 运行环境。Node.js 使用了一个事件驱动、非阻塞式 I/O 的模型，使其轻量又高效。Node.js 的包管理器 npm，是全球最大的开源库生态系统（就是把大家开发的js运行包集合起来，方便开发使用）。
+npm: Nodejs下的包管理器。
+webpack: 它主要的用途是通过CommonJS的语法把所有浏览器端需要发布的静态资源做相应的准备，比如资源的合并和打包。
+vue-cli: 用户生成Vue工程模板。（帮你快速开始一个vue的项目，也就是给你一套vue的结构，包含基础的依赖库，只需要 npm install就可以安装）
+
+【安装Node.js和npm】
+1.安装Node.js，下载地址：https://nodejs.org/en/#download
+2.查看npm和node是否正常
+   首先查看nodejs是否加入到环境变量中，这样就可以直接在cmd中直接运行nodejs下的命令了。打开cmd，输入echo %PATH%，查看环境变量是否配置OK，我配置的如下；输入node -v和npm -v查看nodejs和npm的版本号，进而确认是否配置OK。
+{nodejs和npm配置检查结果}
+
+【加载需要使用的js包】
+   加载js包，npm -g install webpack（需要翻墙，否则先使用npm config set registry=http://registry.npm.taobao.org 配置镜像站）。   npm基本操作命令：https://www.cnblogs.com/lgx5/p/10732016.html
+   查看安装有哪些包 npm list -g --depth 0
+   npm更新到最新版本命令 npm install npm@latest -g
+
+【配置webpack命令】
+   配置webpack命令或其他命令如vue等，需要配置Win环境变量，在用户变量和系统变量path中添加D:\nodejs\node_global\node_modules，在系统变量中新加NODE_PATH为D:\nodejs\node_global\node_modules
+
+【批量压缩图片操作方法】
+上边讲的都是配置环境（安装note.js和npm及配置webpack），接下来需要用npm导入压缩图片需要的包copy-webpack-plugin、imagemin-mozjpeg、imagemin-webpack-plugin、path、webpack、webpack-cli。
+【批量压缩图片命令】解压缩附件image-compressor.zip到D盘，打开cmd，输入以下命令
+cd D:/image-compressor
+webpack --config webpack.config.js --mode production
+【批处理命令压缩图片】为了更方便的批量压缩图片，就写了Windows下的批处理文件excuse-img-min.bat，直接双击运行，就可以将img文件夹下的所有图片批量压缩，而且可以查看处理结果。
+运行结果{图片}
+附件：image-compressor.zip
+
+【【扩展】PHPStorm配置npm】
+   在Settings -> Languages & Frameworks -> Node.js and NPM中配置Node interpreter为安装Node.js时的路径即可，例：D:\nodejs\node.exe。选择后npm在下方自动提示安装版本状况
+
+【webpack.config.js文件内容】
+const imageminMozjpeg = require('imagemin-mozjpeg');
+const ImageminPlugin = require('imagemin-webpack-plugin').default;
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require('path');
+
+module.exports = {
+    entry: './index.js',
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist')
+    },
+    plugins: [
+        new CopyWebpackPlugin({
+            patterns: [{
+                from: 'img/**/**',
+                to: path.resolve(__dirname, 'dist')
+        }]}),
+        new ImageminPlugin({
+            test: /\.(jpe?g|png|gif|svg)$/i,
+            maxFileSize: 20000, // Only apply this one to files equal to or under 20kb
+            jpegtran: {progressive: false},
+            pngquant: ({quality: 90}),
+            plugins: [imageminMozjpeg({quality: 90})]
+        }),
+        new ImageminPlugin({
+            test: /\.(jpe?g|png|gif|svg)$/i,
+            minFileSize: 20000, // Only apply this one to files over 20kb
+            jpegtran: {progressive: true},
+            pngquant: ({quality: 70}),
+            plugins: [imageminMozjpeg({quality: 70})]
+        })
+    ]
+}
